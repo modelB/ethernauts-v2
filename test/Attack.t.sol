@@ -6,6 +6,8 @@ import "../src/CoinFlip.sol";
 import "../src/Attacker.sol";
 import "../src/Telephone.sol";
 import "../src/TelephoneAttacker.sol";
+import "../src/GatekeeperOne.sol";
+import "../src/GatekeeperOneAttacker.sol";
 
 contract AttackerTest is Test {
     CoinFlip public coinFlip;
@@ -39,5 +41,24 @@ contract AttackerTest is Test {
         telephoneAttacker.attack();
         assertTrue(telephone.owner() != oldOwner);
         assertEq(telephone.owner(), deployer);
+    }
+
+    function testFuzz_GateKeeperOne(uint256 gas) public {
+        gas = bound(gas, 5000, .5 ether);
+        GatekeeperOne gatekeeper = new GatekeeperOne();
+        GatekeeperOneAttacker gateKeeperAttacker = new GatekeeperOneAttacker();
+        vm.startPrank(deployer);
+        vm.expectRevert();
+        gateKeeperAttacker.attack(address(gatekeeper), gas);
+        vm.stopPrank();
+    }
+
+    function test_GateKeeperOne() public {
+        GatekeeperOne gatekeeper = new GatekeeperOne();
+        GatekeeperOneAttacker gateKeeperAttacker = new GatekeeperOneAttacker();
+        vm.startPrank(deployer);
+        vm.expectRevert();
+        gateKeeperAttacker.attack(address(gatekeeper), 130378705645490337);
+        vm.stopPrank();
     }
 }
